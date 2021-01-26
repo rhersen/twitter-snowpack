@@ -1,11 +1,33 @@
-/**
- * This file is just a silly example to show everything working in the browser.
- * When you're ready to start on your site, clear the file. Happy hacking!
- **/
+import { fetchAndShowTweets } from './fetchAndShowTweets';
 
-import confetti from 'canvas-confetti';
+interface LastRead {
+  id_str: string;
+}
 
-confetti.create(document.getElementById('canvas') as HTMLCanvasElement, {
-  resize: true,
-  useWorker: true,
-})({ particleCount: 200, spread: 200 });
+iife().then(
+  () => {
+    console.log('done');
+  },
+  () => {
+    console.log('fail');
+  },
+);
+
+async function iife() {
+  setStatus('fauna GET');
+  const faunaResp = await fetch(`/.netlify/functions/fauna`);
+
+  if (!faunaResp.ok) {
+    setStatus(`fauna GET error: ${await faunaResp.text()}`);
+    return;
+  }
+
+  const { id_str } = (await faunaResp.json()) as LastRead;
+  setStatus('twitter GET');
+  // await fetchAndShowTweets(id_str, document.getElementById('tweets'));
+}
+
+function setStatus(s: string) {
+  let elementById = document.getElementById('status');
+  if (elementById) elementById.innerHTML = s;
+}
